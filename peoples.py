@@ -256,3 +256,60 @@ class Hua(People):
         if self.print_info:
             print(f'    {self.name}至下回合行动前防御力上升3点 (DEF={self.DEF}), 下次攻击额外造成{next_hit_value}点元素伤害')
         self.delay_attack_after_act = [None, self.hit_info(hit_value=next_hit_value, can_block=False)]
+
+
+class YiDian(People):
+    def __init__(self):
+        super().__init__()
+        self.name = '伊甸'
+        self.skill_name = '闪亮登场 (下回合先攻)'  # 每2回合发动，永久提升自身4点攻击力，对对手发动一次普通攻击(可触发被动技能)并使下回合先攻改为自己
+        self.talent_name = '海边协奏'  # 每次攻击有50%概率额外发动一次普通攻击，此技能每回合最多触发1次
+        self.ATK = 16
+        self.DEF = 12
+        self.speed = 16
+        self.skill_wait = 2
+        self.talent_probability = 50
+        self.talent_time = 1
+
+    def talent(self, p2: People):
+        return [self.hit_info(hit_value=self.ATK)]
+
+    def skill(self, p2: People):
+        if self.print_info:
+            print(f'    {self.name}永久提升4点攻击力 (ATK={self.ATK}->{self.ATK+4})')
+        self.ATK += 4
+        self.speed += 100
+        self.speed_change = dict(change_times=1, change_value=-100, recover=False)
+        return [self.hit_info(hit_value=self.ATK)]
+
+class QianJie(People):
+    def __init__(self):
+        super().__init__()
+        self.name = '千劫'
+        self.skill_name = '盛夏燔祭 (下回合休息)'  # 每3回合发动，燃烧自己10点生命值，对对手造成45点伤害并附加1~20点元素伤害，此后休息一回合(血量不足11点时无法发动)
+        self.talent_name = '夏之狂热'  # 生命值越低攻击力越高，每损失5点生命值提高1点攻击力(每次自身行动时触发)(不受沉默效果影响)
+        self.ATK_ROW = 23
+        self.ATK = 23
+        self.DEF = 9
+        self.speed = 26
+        self.skill_wait = 3
+        self.talent_probability = 100
+        self.talent_time = 0
+        self.talent_not_mute = True
+        
+    def talent(self, p2: People):
+        self.ATK = int((self.HP_FULL-self.HP)/5)+self.ATK_ROW
+        if self.print_info:
+            print(f'    {self.name}生命值越低攻击力越高 (ATK={self.ATK})')
+
+    def skill_additional_judgment(self, p2):
+        if self.HP >= 11:
+            return True
+        return False
+
+    def skill(self, p2: People):
+        if self.print_info:
+            print(f'    {self.name}燃烧10点生命值 (HP={self.HP}->{self.HP-10})')
+        self.seal = True
+        self.HP -= 10
+        return [self.hit_info(hit_value=45), self.hit_info(hit_value=random.randint(1, 20), can_block=False)]

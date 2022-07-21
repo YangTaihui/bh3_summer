@@ -45,6 +45,10 @@ from peoples import *
 # fights(YiDian, QianJie, 10000)
 # fights(QianJie, YiDian, 10000)
 
+# fight(QianJie, Ying)
+# fights(QianJie, Ying, 10000)
+# fights(Ying, QianJie, 10000)
+
 fight(YiDian, Ying)
-fights(YiDian, Ying, 10000)
-fights(Ying, YiDian, 10000)
+# fights(YiDian, Ying, 10000)
+# fights(Ying, YiDian, 10000)

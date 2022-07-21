@@ -335,7 +335,8 @@ class Ying(People):
 
     def skill(self, p2: People):
         HP_add = random.randint(1, 5)
+        HP_after_add = min(100, self.HP +HP_add)
         if self.print_info:
-            print(f'    {self.name}回复{HP_add}点生命值 (HP={self.HP}->{self.HP+HP_add})')
-        self.HP += HP_add
+            print(f'    {self.name}回复{HP_add}点生命值 (HP={self.HP}->{HP_after_add})')
+        self.HP = HP_after_add
         return [self.hit_info(hit_value=self.ATK, multi=1.3)]

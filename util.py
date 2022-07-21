@@ -366,14 +366,14 @@ def fight_single(P1, P2, show):
     用于n次模拟的单次模拟
     """
     player1, player2 = P1(), P2()
-    if player2.speed > player1.speed:
-        player1, player2 = player2, player1
+    player2.player_number = 2
     if not show:
         player1.print_info, player2.print_info = False, False
-    player2.player_number = 2
 
     counter = 1
     while min(player1.HP, player2.HP) > 0:
+        if player2.speed > player1.speed:
+            player1, player2 = player2, player1
         winner = player1.attack(player2, counter)
         if winner:
             break
@@ -397,8 +397,7 @@ def fights(P1, P2, n: int, show=False):
     p2_win = win_list.count(2)
 
     player1, player2 = P1(), P2()
-    if player2.speed > player1.speed:
-        player1, player2 = player2, player1
+    player2.player_number = 2
     print(f'p1 {player1.name}\t{p1_win}\np2 {player2.name}\t{p2_win}')
     print(f'{player1.name}胜率：{p1_win / n}')
     print(f'{player2.name}胜率：{p2_win / n}')

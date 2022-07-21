@@ -5,8 +5,8 @@ class KaiWen(People):
     def __init__(self):
         super().__init__()
         self.name = '凯文'
-        self.skill_name = '清凉一夏'
-        self.talent_name = '炎热归零 (斩杀技)'
+        self.skill_name = '清凉一夏'  # 每3回合发动，永久提升自身5点攻击力并对对手造成25点元素伤害
+        self.talent_name = '炎热归零 (斩杀技)'  # 攻击后有30%的概率秒杀血量低于30%的对手(混乱状态触发时此技能不会触发)
         self.ATK = 20
         self.DEF = 11
         self.speed = 21
@@ -21,12 +21,15 @@ class KaiWen(People):
         return False
 
     def talent(self, p2):
-        return [self.hit_info(hit_value=p2.HP + 1, can_block=0)]
+        p2.HP = 0
+        return self.player_number
 
     def skill(self, p2):
         self.ATK += 5
-        p2.HP = 0
-        return self.player_number
+        if self.print_info:
+            print(f'    {self.name}永久提升5点攻击力 (ATK={self.ATK})')
+        return [self.hit_info(hit_value=25, can_block=False)]
+
 
 
 class V2V(People):
@@ -125,8 +128,8 @@ class GeLeiXiu(People):
     def __init__(self):
         super().__init__()
         self.name = '格蕾修'
-        self.skill_name = '水彩泡影'
-        self.talent_name = '沙滩监护人'
+        self.skill_name = '水彩泡影'#每3回合发动，绘制一个可以抵挡15点伤害的护盾，护盾受到伤害破碎时对对手造成自身防御力x200%~400%的伤害，护盾未破碎的情况下重新释放技能获得护盾时对对手造成自身防御力的伤害
+        self.talent_name = '沙滩监护人'#每次行动时有40%的概率永久提升自身2点防御力(最高获得10点) (沉默或无法行动时不会触发)
         self.ATK = 16
         self.DEF = 11
         self.speed = 18
@@ -140,8 +143,12 @@ class GeLeiXiu(People):
             print(f'    {self.name}防御力永久提升2点 (DEF={self.DEF})')
 
     def skill(self, p2: People):
+        if self.print_info:
+            print(f'    {self.name}获得一个15点护盾')
         hit_info_list = []
         if self.shield:
+            if self.print_info:
+                print(f'    {self.name}重新获得护盾, 将基于防御力造成伤害')
             hit_info_list.append(self.hit_info(hit_value=self.DEF))
         self.shield = 15
         return hit_info_list
@@ -190,7 +197,10 @@ class AiLiXiYa(People):
         return [self.hit_info(hit_value=11, can_block=False)]
 
     def skill(self, p2: People):
-        p2.ATK_change = dict(change_times=1, change_value=6, recover=True)
+        if p2.speed > self.speed:
+            p2.ATK_change = dict(change_times=1, change_value=-6, recover=True)
+        else:
+            p2.ATK_change = dict(change_times=-1, change_value=-6, recover=True)
         if self.print_info:
             print(f'    {p2.name}下回合攻击力下降6点')
         return [self.hit_info(hit_value=random.randint(25, 50))]

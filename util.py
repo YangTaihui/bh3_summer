@@ -239,8 +239,7 @@ class People:
                             shield_hurt = int(self.DEF * random.randint(200, 400) / 100)
                             shield_hurt_de_HP = max(0, shield_hurt - hit_info_dict['p1'].DEF)
                             if self.print_info:
-                                print(f'    {self.name}护盾破碎, (DEF{self.DEF})造成伤害{shield_hurt}')
-                                print(f'    {hit_info_dict["p1"].name}受反伤 (HP: {hit_info_dict["p1"].HP} -> {hit_info_dict["p1"].HP-shield_hurt_de_HP})')
+                                print(f'    {self.name}护盾破碎, {hit_info_dict["p1"].name}受反伤 (HP: {hit_info_dict["p1"].HP} -> {hit_info_dict["p1"].HP-shield_hurt_de_HP})')
                             hit_info_dict['p1'].HP -= shield_hurt_de_HP
                             if hit_info_dict['p1'].HP <= 0:
                                 return self.player_number

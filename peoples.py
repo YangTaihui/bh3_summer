@@ -313,3 +313,29 @@ class QianJie(People):
         self.seal = True
         self.HP -= 10
         return [self.hit_info(hit_value=45), self.hit_info(hit_value=random.randint(1, 20), can_block=False)]
+
+
+class Ying(People):
+    def __init__(self):
+        super().__init__()
+        self.name = '樱'
+        self.skill_name = '夏之型·瓜切'  # 每2回合发动，回复自身1~5点生命值(最多回复至100点)，并对对手造成1.3倍自身攻击力的伤害(不计小数点以后)
+        self.talent_name = '夏之型·樱流 (固定15%闪避)'  # 受到攻击时有15%的概率闪避本回合所有攻击(不受沉默影响，无法闪避状态伤害)
+        self.ATK = 24
+        self.DEF = 10
+        self.speed = 27
+        self.skill_wait = 2
+        self.talent_probability = 100
+        self.talent_time = 0
+        self.talent_not_mute = True
+        self.evade = 15
+
+    def talent(self, p2: People):
+        pass
+
+    def skill(self, p2: People):
+        HP_add = random.randint(1, 5)
+        if self.print_info:
+            print(f'    {self.name}回复{HP_add}点生命值 (HP={self.HP}->{self.HP+HP_add})')
+        self.HP += HP_add
+        return [self.hit_info(hit_value=self.ATK, multi=1.3)]

@@ -1,4 +1,6 @@
 import random
+
+
 # 需注意: random.randint是左闭右闭, np.random.randint是左闭右开chr(12288)
 
 class People:
@@ -35,6 +37,8 @@ class People:
         self.DEF_change = None  # 防御力变化字典, key: change_times, change_value, recover(恢复)
         self.simple_atk_hurt = 0  # 普攻造成伤害
         self.de_hurt = 0  # 减伤, 受到伤害为 hurt*(1-de_hurt)
+        self.evade = 0  # 闪避, 0-100, 0即没有闪避率, 15即15%闪避率
+        self.evade_state = False  # 闪避所有攻击
 
     def print_attack(self, attack_type):
         """
@@ -54,11 +58,11 @@ class People:
         if self.speed_change is not None:
             assert self.speed_change['change_times'] in [-1, 1]
             if self.speed_change['change_times'] == 1:
-                if self.print_info:
-                    print(f'    {self.name}速度变化 (speed: {self.speed} -> ', end='')
+                # if self.print_info:
+                #     print(f'    {self.name}速度变化 (speed: {self.speed} -> ', end='')
                 self.speed += self.speed_change['change_value']
-                if self.print_info:
-                    print(f'{self.speed})')
+                # if self.print_info:
+                #     print(f'{self.speed})')
                 if self.speed_change['recover']:
                     self.speed_change = dict(change_times=1, change_value=-self.speed_change['change_value'], recover=False)
                 else:
@@ -66,16 +70,13 @@ class People:
             else:
                 self.speed_change['change_times'] = 1
 
-        
         # 攻击力升降
         if self.ATK_change is not None:
             assert self.ATK_change['change_times'] in [-1, 1]
             if self.ATK_change['change_times'] == 1:
                 if self.print_info:
-                    print(f'    {self.name}攻击力变化 (ATK: {self.ATK} -> ', end='')
+                    print(f'    {self.name}攻击力变化 (ATK: {self.ATK} -> {self.ATK+self.ATK_change["change_value"]})')
                 self.ATK += self.ATK_change['change_value']
-                if self.print_info:
-                    print(f'{self.ATK})')
                 if self.ATK_change['recover']:
                     self.ATK_change = dict(change_times=1, change_value=-self.ATK_change['change_value'], recover=False)
                 else:
@@ -88,10 +89,8 @@ class People:
             assert self.DEF_change['change_times'] in [-1, 1]
             if self.DEF_change['change_times'] == 1:
                 if self.print_info:
-                    print(f'    {self.name}防御力变化 (DEF: {self.DEF} -> ', end='')
+                    print(f'    {self.name}防御力变化 (DEF: {self.DEF} -> {self.DEF+self.DEF_change["change_value"]})')
                 self.DEF += self.DEF_change['change_value']
-                if self.print_info:
-                    print(f'{self.DEF})')
                 if self.DEF_change['recover']:
                     self.DEF_change = dict(change_times=1, change_value=-self.DEF_change['change_value'], recover=False)
                 else:
@@ -172,7 +171,7 @@ class People:
                     return winner
 
         # 被沉默但天赋免疫沉默, QianJie
-        elif self.talent_not_mute :
+        elif self.talent_not_mute:
             self.mute = False
             # 回合开始的被动技能
             self.run_talent(p2)
@@ -198,6 +197,9 @@ class People:
                 winner = p2.be_hit(self.simple_atk())
             if winner:
                 return winner
+        # 解除p2闪避状态
+        if p2.evade_state:
+            p2.evade_state = False
         return 0
 
     def be_hit(self, hit_info_dict_list):
@@ -211,56 +213,56 @@ class People:
         # 返回整型即获胜者编号
         if isinstance(hit_info_dict_list, int):
             return hit_info_dict_list
+        # 是否闪避
+        if self.evade:
+            if not self.evade_state:
+                if random.randint(1, 100) <= self.evade:
+                    self.evade_state = True
+                    if self.print_info:
+                        print(f'    {self.name}进入闪避状态')
         # 正常计算伤害
         sum_hurt = 0
-        if len(hit_info_dict_list):
-            for hit_info_dict in hit_info_dict_list:
-                if self.shield:
-                    if hit_info_dict['can_block']:
-                        hurt = int(hit_info_dict['hit_value'] * hit_info_dict['multi']) - self.DEF
-                    else:
-                        hurt = int(hit_info_dict['hit_value'] * hit_info_dict['multi'])
-                    sum_hurt += max(0, hurt - self.shield)
-                    self.shield = max(0, self.shield - hurt)
+        if not self.evade_state:
+            if len(hit_info_dict_list):
+                for hit_info_dict in hit_info_dict_list:
                     if self.shield:
-                        if self.print_info:
-                            print(f'    {self.name}护盾余量{self.shield}')
+                        if hit_info_dict['can_block']:
+                            hurt = int(hit_info_dict['hit_value'] * hit_info_dict['multi']) - self.DEF
+                        else:
+                            hurt = int(hit_info_dict['hit_value'] * hit_info_dict['multi'])
+                        cur_hurt = max(0, hurt - self.shield)
+                        self.shield = max(0, self.shield - hurt)
+                        if self.shield:
+                            if self.print_info:
+                                print(f'    {self.name}护盾余量{self.shield}')
+                        else:
+                            shield_hurt = int(self.DEF * random.randint(200, 400) / 100)
+                            shield_hurt_de_HP = max(0, shield_hurt - hit_info_dict['p1'].DEF)
+                            if self.print_info:
+                                print(f'    {self.name}护盾破碎, (DEF{self.DEF})造成伤害{shield_hurt}')
+                                print(f'    {hit_info_dict["p1"].name}受反伤 (HP: {hit_info_dict["p1"].HP} -> {hit_info_dict["p1"].HP-shield_hurt_de_HP})')
+                            hit_info_dict['p1'].HP -= shield_hurt_de_HP
+                            if hit_info_dict['p1'].HP <= 0:
+                                return self.player_number
+                    elif hit_info_dict['can_block']:
+                        cur_hurt = max(
+                            0, (int(hit_info_dict['hit_value'] * hit_info_dict['multi']) - self.DEF))
                     else:
+                        cur_hurt = int(hit_info_dict['hit_value'] * hit_info_dict['multi'])
+                    sum_hurt += cur_hurt
+
+                    if hit_info_dict['hemophagia']:
+                        HP_after_hemophagia = min(100, hit_info_dict['p1'].HP + cur_hurt)
                         if self.print_info:
-                            print(f'    {self.name}护盾破碎, (DEF{self.DEF})造成伤害', end='')
-                        shield_hurt = int(self.DEF * random.randint(200, 400) / 100)
-                        if self.print_info:
-                            print(shield_hurt)
-                            print(f'    {hit_info_dict["p1"].name}受反伤 (HP: {hit_info_dict["p1"].HP} -> ', end='')
-                        hit_info_dict['p1'].HP -= max(0, shield_hurt - hit_info_dict['p1'].DEF)
-                        if self.print_info:
-                            print(hit_info_dict['p1'].HP, ')')
-                        if hit_info_dict['p1'].HP <= 0:
-                            return self.player_number
-                elif hit_info_dict['can_block']:
-                    sum_hurt += max(
-                        0, (int(hit_info_dict['hit_value'] * hit_info_dict['multi']) - self.DEF))
-                else:
-                    sum_hurt += int(hit_info_dict['hit_value'] * hit_info_dict['multi'])
-        else:
-            return 0
+                            print(f'    {hit_info_dict["p1"].name}恢复{cur_hurt}点生命值 (HP: {hit_info_dict["p1"].HP} -> {HP_after_hemophagia}')
+                        hit_info_dict['p1'].HP = HP_after_hemophagia
+            else:
+                return 0
         # ##### 造成伤害
         sum_hurt = int(sum_hurt * (1 - self.de_hurt))
         if self.print_info:
-            print(f'    {self.name}受{sum_hurt}点伤害 (HP: {self.HP} -> ', end='')
+            print(f'    {self.name}受{sum_hurt}点伤害 (HP: {self.HP} -> {self.HP-sum_hurt})')
         self.HP -= sum_hurt
-        if self.print_info:
-            print(f'{self.HP})')
-        if hit_info_dict['hemophagia']:
-            if self.print_info:
-                print(f'    {hit_info_dict["p1"].name}恢复{sum_hurt}点生命值 (HP: {hit_info_dict["p1"].HP} -> ', end='')
-            hit_info_dict['p1'].HP = min(100, hit_info_dict['p1'].HP + sum_hurt)
-            if self.print_info:
-                print(f'{hit_info_dict["p1"].HP})')
-        # if hit_info_dict['de_def']:
-        #     print(f'{self.name}防御降低{hit_info_dict["de_def"]}点 (DEF: {self.DEF} -> ', end='')
-        #     self.DEF -= hit_info_dict['de_def']
-        #     print(f'{self.DEF})')
         if self.HP <= 0:
             return hit_info_dict['p1'].player_number
         else:
@@ -321,8 +323,9 @@ class People:
         return d
 
 
-def view(p:People):
-    print(f'{p.name.ljust(6, chr(12288))}HP{p.HP:3d}  ATK{p.ATK:3d}  DEF{p.DEF:3d} 速{p.speed:3d}')
+def view(p: People):
+    print(f'{p.name.ljust(6, chr(12288))}HP{p.HP:3d}  ATK{p.ATK:3d}  DEF{p.DEF:3d}')  # 速{p.speed:3d}
+
 
 def fight(P1, P2):
     """

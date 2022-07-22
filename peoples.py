@@ -1,3 +1,6 @@
+"""
+所有角色
+"""
 from util import *
 
 
@@ -54,6 +57,9 @@ class V2V(People):
     def talent(self, p2: People):
         self.HP += random.randint(10, 20)
         p2.HP += random.randint(10, 20)
+        if self.print_info:
+            print(f'    {self.name.ljust(6, chr(12288))} HP={self.HP}')
+            print(f'    {p2.name.ljust(6, chr(12288))} HP={p2.HP}')
         if self.talent_counter:
             atk_add = random.randint(2, 15)
             self.ATK += atk_add

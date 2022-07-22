@@ -1,7 +1,8 @@
+"""
+角色的基类，以及项目所需的方法
+"""
 import random
-
-
-# 需注意: random.randint是左闭右闭, np.random.randint是左闭右开chr(12288)
+# 需注意: random.randint是左闭右闭, np.random.randint是左闭右开
 
 class People:
 

@@ -36,8 +36,8 @@ class V2V(People):
     def __init__(self):
         super().__init__()
         self.name = '维尔薇'
-        self.skill_name = '创（造）力'
-        self.talent_name = '大变活人'
+        self.skill_name = '创（造）力'#每3回合发动，对对手造成自己攻击力的伤害，并使对手陷入混乱状态(效果:对手下次普通攻击伤害返还自身，无视回合数)
+        self.talent_name = '大变活人'#回合开始时若维尔薇血量低于31，则自身与对手回复10~20点生命值(生命值回复分别计算)并永久提升自身2~15点攻击力(每场比赛最多触发1次)
         self.ATK = 20
         self.DEF = 12
         self.speed = 25
@@ -47,7 +47,7 @@ class V2V(People):
         self.talent_time = 0
 
     def talent_additional_judgment(self, p2):
-        if self.HP < 31:
+        if self.HP_before_attack < 31:
             return True
         return False
 
@@ -56,9 +56,9 @@ class V2V(People):
         p2.HP += random.randint(10, 20)
         if self.talent_counter:
             atk_add = random.randint(2, 15)
-            if self.print_info:
-                print(f'    {self.name}永久提升攻击力{atk_add}点')
             self.ATK += atk_add
+            if self.print_info:
+                print(f'    {self.name}永久提升攻击力{atk_add}点 (ATK=self.ATK)')
             self.talent_counter -= 1
 
     def skill(self, p2):
@@ -98,8 +98,8 @@ class ABoNiYa(People):
     def __init__(self):
         super().__init__()
         self.name = '阿波尼亚'
-        self.skill_name = '深蓝之槛'
-        self.talent_name = '该休息了'
+        self.skill_name = '深蓝之槛'#每4回合发动，对对手造成1.7倍自身攻击力的伤害(倍数伤害不计算小数点以后的数值)并封印对方在本回合的行动
+        self.talent_name = '该休息了'#每次攻击有30%的概率沉默对手(本回合内主被动均失效，只能使用普通攻击，特殊标注除外) (混乱状态下触发时状态返还自身)
         self.ATK = 21
         self.DEF = 10
         self.speed = 30
@@ -246,8 +246,8 @@ class Hua(People):
     def __init__(self):
         super().__init__()
         self.name = '华'
-        self.skill_name = '上伞若水'
-        self.talent_name = '攻守兼备 (固定20%减伤)'
+        self.skill_name = '上伞若水'#每2回合发动，进入蓄力状态，本回合不进行攻击，自身至下次行动前防御力提升3点，下次攻击时额外对对手造成10~33点元素伤害(此伤害不受混乱状态影响)
+        self.talent_name = '攻守兼备 (固定20%减伤)'#受到的伤害减少20% (不受沉默状态影响)
         self.ATK = 21
         self.DEF = 12
         self.speed = 15
@@ -285,9 +285,9 @@ class YiDian(People):
         return [self.hit_info(hit_value=self.ATK)]
 
     def skill(self, p2: People):
-        if self.print_info:
-            print(f'    {self.name}永久提升4点攻击力 (ATK={self.ATK}->{self.ATK+4})')
         self.ATK += 4
+        if self.print_info:
+            print(f'    {self.name}永久提升4点攻击力 (ATK={self.ATK})')
         self.speed += 100
         self.speed_change = dict(change_times=1, change_value=-100, recover=False)
         return [self.hit_info(hit_value=self.ATK)]
@@ -318,10 +318,10 @@ class QianJie(People):
         return False
 
     def skill(self, p2: People):
-        if self.print_info:
-            print(f'    {self.name}燃烧10点生命值 (HP={self.HP}->{self.HP-10})')
         self.seal = True
-        self.HP -= 10
+        self.HP -= 10        
+        if self.print_info:
+            print(f'    {self.name}燃烧10点生命值 (HP={self.HP})')
         return [self.hit_info(hit_value=45), self.hit_info(hit_value=random.randint(1, 20), can_block=False)]
 
 
@@ -345,8 +345,7 @@ class Ying(People):
 
     def skill(self, p2: People):
         HP_add = random.randint(1, 5)
-        HP_after_add = min(100, self.HP +HP_add)
+        self.HP = min(100, self.HP +HP_add)
         if self.print_info:
-            print(f'    {self.name}回复{HP_add}点生命值 (HP={self.HP}->{HP_after_add})')
-        self.HP = HP_after_add
+            print(f'    {self.name}回复{HP_add}点生命值 (HP={self.HP})')
         return [self.hit_info(hit_value=self.ATK, multi=1.3)]

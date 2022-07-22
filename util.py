@@ -11,6 +11,7 @@ class People:
         self.talent_name = ''  # 被动技能
         self.HP_FULL = 100
         self.HP = 100
+        self.HP_before_attack = 100  # 回合开始前的生命值(V2V对科斯魔, V2V的被动基于此值, 而非受撕裂伤害后的HP)
         self.ATK_ROW = 0  # 初始攻击力
         self.ATK = 0
         self.DEF = 0
@@ -54,6 +55,7 @@ class People:
         一回合的攻击
         :return: 0:无人获胜, 1:self 获胜, 2:p2 获胜
         """
+        self.HP_before_attack = self.HP
         # 速度升降
         if self.speed_change is not None:
             assert self.speed_change['change_times'] in [-1, 1]

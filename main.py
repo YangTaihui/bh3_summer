@@ -53,11 +53,20 @@ from peoples import *
 # fights(YiDian, Ying, 10000)
 # fights(Ying, YiDian, 10000)
 
-# 7.22 半决赛
+# 7.22 8进4
 # fight(KaiWen, AiLiXiYa)
 # fights(KaiWen, AiLiXiYa, 10000)
 # fights(AiLiXiYa, KaiWen, 10000)
 
-fight(YiDian, GeLeiXiu)
+# fight(YiDian, GeLeiXiu)
 # fights(YiDian, GeLeiXiu, 10000)
 # fights(GeLeiXiu, YiDian, 10000)
+
+# 7.23 8进4
+# fight(Hua, V2V)
+# fights(Hua, V2V, 10000)
+# fights(V2V, Hua, 10000)
+
+# fight(Ying, ABoNiYa)
+# fights(Ying, ABoNiYa, 10000)
+# fights(ABoNiYa, Ying, 10000)

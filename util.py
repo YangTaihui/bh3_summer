@@ -35,7 +35,7 @@ class People:
         self.delay_attack_before_act = []  # 延迟的行动前攻击
         self.delay_attack_after_act = []  # 延迟的行动后攻击
         self.speed_change = None  # 速度变化字典, key: change_times, change_value, recover(恢复)
-        self.ATK_change = None  # 攻击力变化字典, key: change_times, change_value, recover(恢复)
+        self.ATK_change = []  # 攻击力变化字典, key: change_times, change_value, recover(恢复)
         self.DEF_change = None  # 防御力变化字典, key: change_times, change_value, recover(恢复)
         self.simple_atk_hurt = 0  # 普攻造成伤害
         self.de_hurt = 0  # 减伤, 受到伤害为 hurt*(1-de_hurt)
@@ -74,18 +74,22 @@ class People:
                 self.speed_change['change_times'] = 1
 
         # 攻击力升降
-        if self.ATK_change is not None:
-            assert self.ATK_change['change_times'] in [-1, 1]
-            if self.ATK_change['change_times'] == 1:
-                if self.print_info:
-                    print(f'    {self.name}攻击力变化 (ATK: {self.ATK} -> {self.ATK+self.ATK_change["change_value"]})')
-                self.ATK += self.ATK_change['change_value']
-                if self.ATK_change['recover']:
-                    self.ATK_change = dict(change_times=1, change_value=-self.ATK_change['change_value'], recover=False)
+        if len(self.ATK_change) != 0:
+            pop_index = []
+            for i, ATK_change in enumerate(self.ATK_change):
+                if ATK_change['change_times'] == 1:
+                    if self.print_info:
+                        print(f'    {self.name}攻击力变化 (ATK: {self.ATK} -> {self.ATK+ATK_change["change_value"]})')
+                    self.ATK += ATK_change['change_value']
+                    if ATK_change['recover']:
+                        self.ATK_change[i] = dict(change_times=1, change_value=-ATK_change['change_value'], recover=False)
+                    else:
+                        pop_index.append(i)
                 else:
-                    self.ATK_change = None
-            else:
-                self.ATK_change['change_times'] = 1
+                    self.ATK_change[i]['change_times'] = 1
+            for i in pop_index:
+                self.ATK_change.pop(i)
+
 
         # 防御力升降
         if self.DEF_change is not None:

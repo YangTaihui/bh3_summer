@@ -186,8 +186,8 @@ class AiLiXiYa(People):
     def __init__(self):
         super().__init__()
         self.name = '爱莉希雅'
-        self.skill_name = '夏梦之花'
-        self.talent_name = '水花溅射'
+        self.skill_name = '夏梦之花'#每2回合发动，对对手造成25~50点伤害并使对手下次行动时攻击力下降6点(行为不包括释放被动技能)
+        self.talent_name = '水花溅射'#攻击后有35%的概率追加一次溅射攻击，造成11点元素伤害(混乱状态下触发时伤害返还给自身)
         self.ATK = 21
         self.DEF = 8
         self.speed = 20
@@ -204,12 +204,13 @@ class AiLiXiYa(People):
 
     def skill(self, p2: People):
         if p2.speed > self.speed:
-            p2.ATK_change = dict(change_times=1, change_value=-6, recover=True)
+            p2.ATK_change.append(dict(change_times=1, change_value=-6, recover=True))
         else:
-            p2.ATK_change = dict(change_times=-1, change_value=-6, recover=True)
+            p2.ATK_change.append(dict(change_times=-1, change_value=-6, recover=True))
+        hit_value = random.randint(25, 50)
         if self.print_info:
-            print(f'    {p2.name}下回合攻击力下降6点')
-        return [self.hit_info(hit_value=random.randint(25, 50))]
+            print(f'    伤害{hit_value}, {p2.name}下回合攻击力下降6点')
+        return [self.hit_info(hit_value=hit_value)]
 
 
 class MeiBiWuSi(People):

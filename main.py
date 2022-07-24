@@ -62,3 +62,10 @@ from peoples import *
 
 # fight(Hua, ABoNiYa)
 # fights(Hua, ABoNiYa, 10000)
+
+# 7.25 决赛
+# fight(AiLiXiYa, Hua)
+# fights(AiLiXiYa, Hua, 10000)
+
+# fight(AiLiXiYa, ABoNiYa)
+# fights(AiLiXiYa, ABoNiYa, 10000)

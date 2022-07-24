@@ -203,13 +203,10 @@ class AiLiXiYa(People):
         return [self.hit_info(hit_value=11, can_block=False)]
 
     def skill(self, p2: People):
-        if p2.speed > self.speed:
-            p2.ATK_change.append(dict(change_times=1, change_value=-6, recover=True))
-        else:
-            p2.ATK_change.append(dict(change_times=-1, change_value=-6, recover=True))
+        p2.ATK_change.append(dict(change_times=1, change_value=-6, recover=True))
         hit_value = random.randint(25, 50)
         if self.print_info:
-            print(f'    伤害{hit_value}, {p2.name}下回合攻击力下降6点')
+            print(f'    伤害{hit_value}, {p2.name}下次行动时攻击力下降6点')
         return [self.hit_info(hit_value=hit_value)]
 
 
